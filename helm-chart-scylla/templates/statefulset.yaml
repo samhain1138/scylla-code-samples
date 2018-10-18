@@ -47,7 +47,7 @@ spec:
               fieldPath: status.podIP
         args:
           - --seeds
-          - {{ template "scylladb.fullname" . }}-0.{{ template "scylladb.fullname" . }}.default.svc.cluster.local
+          - {{ template "scylladb.fullname" . }}-0.{{ template "scylladb.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
           {{- if .Values.config.overprovisioned }}
           - --overprovisioned
           {{- end }}
