@@ -23,7 +23,7 @@ spec:
       containers:
       - name: {{ template "scylladb.fullname" . }}
         image: {{ .Values.image.repository }}
-        resources: 
+        resources:
 {{ toYaml .Values.resources | indent 10 }}
         ports:
           - containerPort: {{ .Values.service.cqlPort }}
@@ -46,7 +46,7 @@ spec:
             fieldRef:
               fieldPath: status.podIP
         args:
-          - --seeds 
+          - --seeds
           - {{ template "scylladb.fullname" . }}-0.{{ template "scylladb.fullname" . }}.default.svc.cluster.local
           {{- if .Values.config.overprovisioned }}
           - --overprovisioned
@@ -73,6 +73,8 @@ spec:
           initialDelaySeconds: 15
           timeoutSeconds: 5
         volumeMounts:
+          - name: scylla-conf-yaml
+            mountPath: /etc/scylla/scylla.yaml
           - name: scylla-ready-probe
             mountPath: /opt/ready-probe.sh
           {{- if .Values.persistence.size }}
@@ -82,12 +84,21 @@ spec:
       volumes:
         - name: scylla-ready-probe
           configMap:
-            name: scylla 
+            name: scylla
+            items:
+            - key: ready-probe.sh
+              path: ready-probe.sh
+        - name: scylla-conf-yaml
+          configMap:
+            name: scylla
+            items:
+            - key: scylla.yaml
+              path: scylla.yaml
   volumeClaimTemplates:
     - metadata:
         name: datadir
       spec:
-        accessModes: 
+        accessModes:
           - {{ .Values.persistence.accessMode | quote }}
         resources:
           requests:
